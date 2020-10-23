@@ -1,0 +1,2 @@
+# json2sqlobject
+从Json转换到PHP查询结果的Object
