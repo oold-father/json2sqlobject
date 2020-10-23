@@ -20,6 +20,13 @@ void JsonTest() {
 }
 
 MYSQL_FIELD *fieldTest(MYSQL_FIELD *mysqlField, int len){
+    /*
+    [{
+        "name": "age",
+        "org_name": "age",
+        "type": "int"
+     }]
+     * */
     MYSQL_FIELD *tmp;
     int i;
     char **a;
@@ -42,6 +49,7 @@ MYSQL_FIELD *fieldTest(MYSQL_FIELD *mysqlField, int len){
         tmp->db = (char *) &"test";
         tmp->catalog = (char *) &"def";
         tmp->def = nullptr;
+        //
         tmp->length = 11;
         tmp->max_length = 0;
         tmp->name_length = strlen(mysqlField->name);
@@ -63,7 +71,12 @@ MYSQL_FIELD *fieldTest(MYSQL_FIELD *mysqlField, int len){
 }
 
 void TestRows(MYSQL_ROWS* mysqlRows){
-
+    /*
+    [{
+        "age": 22,
+        "name": "yinxin"
+     }]
+     * */
     MYSQL_ROW row;
     row = (MYSQL_ROW)malloc(sizeof(char **)*2);
     memset(row, 0, sizeof(char **)*2);
