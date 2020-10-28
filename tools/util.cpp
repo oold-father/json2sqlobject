@@ -103,6 +103,7 @@ MYSQL_ROWS* makeMysqlRows(nlohmann::json rows){
             valueStr = item.value().dump().c_str();
             mysqlRow[i] = (char *)malloc(strlen((char *)valueStr)+1);
             strcpy(mysqlRow[i], (char *)valueStr);
+            i++;
         }
         mysqlRows->data = mysqlRow;
 
