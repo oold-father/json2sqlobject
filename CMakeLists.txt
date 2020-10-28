@@ -11,6 +11,6 @@ include_directories(${jsoncpp_include_dir})
 link_directories(${jsoncpp_link_dir})
 
 
-add_executable(json2sql_tool main.cpp tools/util.h tools/util.cpp tools/my_structs.h)
+add_executable(json2sql_tool main.cpp tools/util.h tools/util.cpp)
 
 target_link_libraries(${EXE_NAME} jsoncpp dl mysqlclient)
