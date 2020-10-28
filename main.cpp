@@ -22,7 +22,7 @@ int main() {
 
 
     std::cout << "input field json:" << std::endl;
-    string fieldStr = R"(    [{
+    string fieldStr = R"([{
         "name": "age",
         "org_name": "age",
         "table": "json",
@@ -45,6 +45,7 @@ int main() {
     string rowsValue = R"([{"name":"yinxin","age":22},{"name":"geek","age":21}])";
     json rowsRoot = json::parse(rowsValue);
     std::cout << rowsRoot.dump(4) << std::endl;
+    std::cout << "\r" << std::endl;
 
     conn = mysql_init(nullptr);
 
@@ -60,7 +61,7 @@ int main() {
         exit(1);
     }
 
-    res = makeRes(conn);
+    res = makeRes(conn, fieldRoot, rowsRoot);
 
     printf("Result:\n");
 

@@ -3,6 +3,7 @@
 //
 #include <iostream>
 #include <string>
+#include <utility>
 #include <json/json.h>
 #include <mysql/mysql.h>
 #include "nlohmann/json.hpp"
@@ -117,7 +118,7 @@ MYSQL_ROWS* makeMysqlRows(nlohmann::json rows){
     return  result;
 }
 
-MYSQL_RES *makeRes(MYSQL *conn) {
+MYSQL_RES *makeRes(MYSQL *conn,const nlohmann::json& fieldRoot,const nlohmann::json& rowsRoot) {
     MYSQL_RES *myRes;
     unsigned long *lengths;
     unsigned long lenTemp = 0;
@@ -154,39 +155,14 @@ MYSQL_RES *makeRes(MYSQL *conn) {
      *  需要给数据
      *******************************************/
     // data fields
-    string fieldStr = R"([{
-        "name": "age",
-        "org_name": "age",
-        "table": "json",
-        "org_table": "json",
-        "db": "test",
-        "type": "int"
-     },
-     {
-        "name": "name",
-        "org_name": "name",
-        "table": "json",
-        "org_table": "json",
-        "db": "test",
-        "type": "string"
-     }])";
-    json fieldRoot = json::parse(fieldStr);
-
     memSize = sizeof(MYSQL_FIELD)*fieldRoot.size();
     mysqlField = (MYSQL_FIELD*)malloc(memSize);
     memset(mysqlField, 0 , memSize);
+
     myRes->fields = makeMysqlFields(mysqlField, fieldRoot);
     myRes->field_count = fieldRoot.size();
 
     // data rows
-    string rowsStr = R"([{
-        "age": 22,
-        "name": "yinxin"
-     },{
-        "age": 21,
-        "name": "geek"
-     }])";
-    json rowsRoot = json::parse(rowsStr);
     myRes->data_cursor = makeMysqlRows(rowsRoot);
     return myRes;
 }

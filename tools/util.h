@@ -11,6 +11,6 @@
 #endif //JSON2SQL_TOOL_UTIL_H
 
 void JsonTest();
-MYSQL_RES * makeRes(MYSQL *conn);
+MYSQL_RES * makeRes(MYSQL *conn,const nlohmann::json& fieldRoot,const nlohmann::json& rowsRoot);
 void makeMysqlField(MYSQL_FIELD *tmp, nlohmann::json field);
 MYSQL_FIELD* makeMysqlFields(nlohmann::json fields);
