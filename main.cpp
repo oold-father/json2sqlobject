@@ -54,14 +54,9 @@ int main() {
         exit(1);
     }
 
+    // 调用自定义的函数生成查询结果
     // select * from test.json;
-    const char *sql = "select * from json;";
-    if (mysql_real_query(conn, sql, strlen(sql))) {
-        fprintf(stderr, "%s\n", mysql_error(conn));
-        exit(1);
-    }
-
-    res = makeRes(conn, fieldRoot, rowsRoot);
+    res = makeMysqlRes(conn, fieldRoot, rowsRoot);
 
     printf("Result:\n");
 
@@ -86,8 +81,8 @@ int main() {
     }
     printf("**************\n");
 
-
-//    mysql_free_result(res);
+    // 调用该函数可能会有释放两次内存的问题
+    // mysql_free_result(res);
     mysql_close(conn);
 
     return 0;

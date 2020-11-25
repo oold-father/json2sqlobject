@@ -12,9 +12,21 @@ using json = nlohmann::json;
 using string = std::string;
 
 
-void makeMysqlField(MYSQL_FIELD *tmp, nlohmann::json field){
+void makeMysqlField(MYSQL_FIELD *tmp, nlohmann::json field) {
+    /*
+     tmp: 外部初始化的MYSQL_FIELD指针
+     field: json对象，结构如下
+        {
+            "name": "age",
+            "org_name": "age",
+            "table": "json",
+            "org_table": "json",
+            "db": "test",
+            "type": "int"
+         }
+     * */
     const char *temp;
-    if (field== nullptr){
+    if (field == nullptr) {
         return;
     }
     temp = field["name"].dump().c_str();
@@ -43,37 +55,55 @@ void makeMysqlField(MYSQL_FIELD *tmp, nlohmann::json field){
     tmp->catalog_length = strlen(tmp->catalog);
     tmp->def_length = 0;
     tmp->flags = 0;
-    tmp->decimals= 0;
-    tmp->charsetnr=63;
+    tmp->decimals = 0;
+    tmp->charsetnr = 63;
 
-    if(strcmp(field["type"].dump().c_str(), "int") == 0){
-        tmp->type=MYSQL_TYPE_LONGLONG;
+    if (strcmp(field["type"].dump().c_str(), "int") == 0) {
+        tmp->type = MYSQL_TYPE_LONGLONG;
         tmp->length = 11;
-    }else if(strcmp(field["type"].dump().c_str(), "float") == 0){
-        tmp->type=MYSQL_TYPE_FLOAT;
+    } else if (strcmp(field["type"].dump().c_str(), "float") == 0) {
+        tmp->type = MYSQL_TYPE_FLOAT;
         tmp->length = 11;
-    }
-    else{
-        tmp->type=MYSQL_TYPE_STRING;
+    } else {
+        tmp->type = MYSQL_TYPE_STRING;
         tmp->length = 1020;
     }
-    tmp->extension= nullptr;
+    tmp->extension = nullptr;
 }
 
-MYSQL_FIELD* makeMysqlFields(MYSQL_FIELD *result, nlohmann::json fields){
+MYSQL_FIELD *makeMysqlFields(MYSQL_FIELD *result, nlohmann::json fields) {
+    /*
+     tmp: 外部初始化的MYSQL_FIELD指针
+     fields: json对象，结构如下
+        [{
+            "name": "age",
+            "org_name": "age",
+            "table": "json",
+            "org_table": "json",
+            "db": "test",
+            "type": "int"
+         },
+         {
+            "name": "name",
+            "org_name": "name",
+            "table": "json",
+            "org_table": "json",
+            "db": "test",
+            "type": "string"
+         }]
+     * */
     MYSQL_FIELD *tmp;
-    int i=0;
+    int i = 0;
     int count;
 
     count = fields.size();
 
-    if (fields== nullptr || count < 1 ){
+    if (fields == nullptr || count < 1) {
         return nullptr;
     }
 
-    for (const auto& item : fields.items())
-    {
-        tmp = result+i;
+    for (const auto &item : fields.items()) {
+        tmp = result + i;
         makeMysqlField(tmp, item.value());
         i++;
     }
@@ -81,44 +111,54 @@ MYSQL_FIELD* makeMysqlFields(MYSQL_FIELD *result, nlohmann::json fields){
     return result;
 }
 
-MYSQL_ROWS* makeMysqlRows(nlohmann::json rows){
+MYSQL_ROWS *makeMysqlRows(nlohmann::json rows) {
+    /*
+     rows: json对象,其结构和makeMysqlFields的入参fields所指定结构的一致，
+     以makeMysqlFields的示例结构为例，应当输入的rows结构如下：
+     [{"name":"yinxin","age":22},
+     {"name":"geek","age":21}]
+     * */
     MYSQL_ROW mysqlRow;
     MYSQL_ROWS *mysqlRows;
     MYSQL_ROWS *parent;
-    MYSQL_ROWS *result=nullptr;
+    MYSQL_ROWS *result = nullptr;
     int fieldCount;
     int i;
     const char *valueStr;
 
-    for (const auto& row : rows.items())
-    {
-        mysqlRows = (MYSQL_ROWS *)malloc(sizeof(MYSQL_ROWS));
+    for (const auto &row : rows.items()) {
+        mysqlRows = (MYSQL_ROWS *) malloc(sizeof(MYSQL_ROWS));
         memset(mysqlRows, 0, sizeof(MYSQL_ROWS));
 
         fieldCount = row.value().size();
-        mysqlRow = (MYSQL_ROW)malloc(sizeof(char **)*fieldCount);
-        memset(mysqlRow, 0, sizeof(char **)*fieldCount);
+        mysqlRow = (MYSQL_ROW) malloc(sizeof(char **) * fieldCount);
+        memset(mysqlRow, 0, sizeof(char **) * fieldCount);
 
-        i =0 ;
-        for (const auto& item : row.value().items()){
+        i = 0;
+        for (const auto &item : row.value().items()) {
             valueStr = item.value().dump().c_str();
-            mysqlRow[i] = (char *)malloc(strlen((char *)valueStr)+1);
-            strcpy(mysqlRow[i], (char *)valueStr);
+            mysqlRow[i] = (char *) malloc(strlen((char *) valueStr) + 1);
+            strcpy(mysqlRow[i], (char *) valueStr);
             i++;
         }
         mysqlRows->data = mysqlRow;
 
-        if (result== nullptr){
+        if (result == nullptr) {
             parent = result = mysqlRows;
-        } else{
+        } else {
             parent->next = mysqlRows;
             parent = parent->next;
         }
     }
-    return  result;
+    return result;
 }
 
-MYSQL_RES *makeRes(MYSQL *conn,const nlohmann::json& fieldRoot,const nlohmann::json& rowsRoot) {
+MYSQL_RES *makeMysqlRes(MYSQL *conn, const nlohmann::json &fieldRoot, const nlohmann::json &rowsRoot) {
+    /*
+     * conn: MYSQL连接的结构体
+     * fieldRoot: json对象的地址，结构参见makeMysqlFields入参
+     * rowsRoot: json对象的地址，makeMysqlRows
+     * */
     MYSQL_RES *myRes;
     unsigned long *lengths;
     unsigned long lenTemp = 0;
@@ -148,17 +188,16 @@ MYSQL_RES *makeRes(MYSQL *conn,const nlohmann::json& fieldRoot,const nlohmann::j
     myRes->metadata = conn->resultset_metadata;
 
     // default nullptr
-    mysqlData = (MYSQL_DATA*) malloc(sizeof(MYSQL_DATA));
+    mysqlData = (MYSQL_DATA *) malloc(sizeof(MYSQL_DATA));
     memset(mysqlData, 0, sizeof(MYSQL_DATA));
     myRes->data = mysqlData;
     /*******************************************
-     *  需要给数据
+     *  需要给的数据
      *******************************************/
     // data fields
-    memSize = sizeof(MYSQL_FIELD)*fieldRoot.size();
-    mysqlField = (MYSQL_FIELD*)malloc(memSize);
-    memset(mysqlField, 0 , memSize);
-
+    memSize = sizeof(MYSQL_FIELD) * fieldRoot.size();
+    mysqlField = (MYSQL_FIELD *) malloc(memSize);
+    memset(mysqlField, 0, memSize);
     myRes->fields = makeMysqlFields(mysqlField, fieldRoot);
     myRes->field_count = fieldRoot.size();
 

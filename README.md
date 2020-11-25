@@ -10,7 +10,7 @@
 
 现在可以通过提供 `MYSQL` 结构体、两个 `json` 结构来模拟真实请求，生成`MYSQL_RES` 的结构体
 
-    MYSQL_RES *makeRes(MYSQL *conn,const nlohmann::json& fieldRoot,const nlohmann::json& rowsRoot);
+    MYSQL_RES *makeMysqlRes(MYSQL *conn,const nlohmann::json& fieldRoot,const nlohmann::json& rowsRoot);
 
 `fieldRoot` 的结构
 
