@@ -42,7 +42,7 @@ int main() {
     std::cout << fieldRoot.dump(4) << std::endl;
 
     std::cout << "input row json:" << std::endl;
-    string rowsValue = R"([{"name":"yinxin","age":22},{"name":"geek","age":21}])";
+    string rowsValue = R"([{"name":"yinxin","age":22},{"name":"geek","age":null}])";
     json rowsRoot = json::parse(rowsValue);
     std::cout << rowsRoot.dump(4) << std::endl;
     std::cout << "\r" << std::endl;
@@ -70,8 +70,6 @@ int main() {
     num_fields = mysql_num_fields(res);
     while ((row = mysql_fetch_row(res)))
     {
-        unsigned long *lengths;
-        lengths = mysql_fetch_lengths(res);
         for(i = 0; i < num_fields; i++)
         {
             printf("%s",row[i] ? row[i] : "NULL");

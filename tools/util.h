@@ -3,14 +3,17 @@
 //
 
 #include <mysql/mysql.h>
+
 #include "nlohmann/json.hpp"
 
 #ifndef JSON2SQL_TOOL_UTIL_H
 #define JSON2SQL_TOOL_UTIL_H
 
 #endif //JSON2SQL_TOOL_UTIL_H
+using string = std::string;
 
 MYSQL_RES * makeMysqlRes(MYSQL *conn, const nlohmann::json& fieldRoot, const nlohmann::json& rowsRoot);
 void makeMysqlField(MYSQL_FIELD *tmp, nlohmann::json field);
 MYSQL_FIELD* makeMysqlFields(nlohmann::json fields);
 MYSQL_ROWS *makeMysqlRows(nlohmann::json rows);
+void EraseChar(string &s, char &c);

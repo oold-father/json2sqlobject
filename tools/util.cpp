@@ -1,9 +1,7 @@
 //
 // Created by yinxin on 2020/10/5.
 //
-#include <iostream>
 #include <string>
-#include <utility>
 #include <json/json.h>
 #include <mysql/mysql.h>
 #include "nlohmann/json.hpp"
@@ -11,6 +9,10 @@
 using json = nlohmann::json;
 using string = std::string;
 
+void EraseChar(string &s, char &c){
+    s.erase(s.find_last_not_of(c) + 1);
+    s.erase(0, s.find_first_not_of(c));
+}
 
 void makeMysqlField(MYSQL_FIELD *tmp, nlohmann::json field) {
     /*
@@ -26,22 +28,34 @@ void makeMysqlField(MYSQL_FIELD *tmp, nlohmann::json field) {
          }
      * */
     const char *temp;
+    string s;
     if (field == nullptr) {
         return;
     }
-    temp = field["name"].dump().c_str();
+    s = field["name"].dump();
+    EraseChar(s, (char &) "\"");
+    temp = s.c_str();
     tmp->name = strdup(temp);
 
-    temp = field["org_name"].dump().c_str();
+
+    s = field["org_name"].dump();
+    EraseChar(s, (char &) "\"");
+    temp = s.c_str();
     tmp->org_name = strdup(temp);;
 
-    temp = field["table"].dump().c_str();
+    s = field["table"].dump();
+    EraseChar(s, (char &) "\"");
+    temp = s.c_str();
     tmp->table = strdup(temp);;
 
-    temp = field["org_table"].dump().c_str();
+    s = field["org_table"].dump();
+    EraseChar(s, (char &) "\"");
+    temp = s.c_str();
     tmp->org_table = strdup(temp);;
 
-    temp = field["db"].dump().c_str();
+    s = field["db"].dump();
+    EraseChar(s, (char &) "\"");
+    temp = s.c_str();
     tmp->db = strdup(temp);
     tmp->catalog = (char *) &"def";
     tmp->def = nullptr;
@@ -136,9 +150,15 @@ MYSQL_ROWS *makeMysqlRows(nlohmann::json rows) {
 
         i = 0;
         for (const auto &item : row.value().items()) {
-            valueStr = item.value().dump().c_str();
-            mysqlRow[i] = (char *) malloc(strlen((char *) valueStr) + 1);
-            strcpy(mysqlRow[i], (char *) valueStr);
+            string s = item.value().dump();
+            EraseChar(s, (char &) "\"");
+            valueStr = s.c_str();
+            if (strcmp(valueStr, "null") == 0){
+                mysqlRow[i] = nullptr;
+            } else{
+                mysqlRow[i] = (char *) malloc(strlen((char *) valueStr) + 1);
+                strcpy(mysqlRow[i], (char *) valueStr);
+            }
             i++;
         }
         mysqlRows->data = mysqlRow;
